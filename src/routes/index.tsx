@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, PageHeader, Stat, StatusBadge } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { DEMO_PATIENT, doctorById, formatDate, queueInfo, today, useStore } from "@/lib/queue-store";
+import { DEMO_PATIENT, doctorById, formatDate, isUpcoming, queueInfo, today, useStore } from "@/lib/queue-store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Patient Dashboard – QueueWise" },
       { name: "description", content: "See your upcoming appointment, queue token and estimated waiting time." },
       { property: "og:title", content: "Patient Dashboard – QueueWise" },
@@ -19,7 +21,7 @@ function PatientDashboard() {
   const s = useStore();
   const mine = s.appointments.filter((a) => a.patientId === DEMO_PATIENT.id);
   const active = mine.find((a) => a.date === today() && (a.status === "waiting" || a.status === "serving"));
-  const upcoming = mine.filter((a) => a.status === "booked").sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0];
+  const upcoming = mine.filter((a) => a.status === "booked" && isUpcoming(a)).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0];
   const info = active ? queueInfo(s, active) : null;
   const doc = active ? doctorById(active.doctorId) : null;
 
@@ -30,7 +32,7 @@ function PatientDashboard() {
       {active && info && doc ? (
         active.status === "serving" ? (
           <Card className="mb-6 border-primary bg-primary text-primary-foreground">
-            <p className="text-sm font-semibold uppercase tracking-wide">Status: Your turn</p>
+            <p className="text-sm font-semibold uppercase tracking-wide">Status: Your Turn</p>
             <h2 className="mt-1 text-3xl font-semibold">Please proceed to {doc.room}</h2>
             <p className="mt-1">Token {active.token} · {doc.name}</p>
           </Card>
@@ -45,11 +47,12 @@ function PatientDashboard() {
               <StatusBadge status={active.status} />
             </div>
             <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-              <Stat label="Estimated wait" value={`~${info.waitMinutes} min`} />
+              <Stat label="Estimated wait" value={info.nextInLine ? "Awaiting call" : `~${info.waitMinutes} min`} />
               <Stat label="People ahead" value={info.ahead} />
               <Stat label="Queue position" value={`${info.position} of ${info.total}`} />
               <Stat label="Now serving" value={info.serving?.token ?? "—"} />
             </div>
+            {info.nextInLine && <p role="status" className="mt-3 text-sm font-medium text-primary">You're next in line. Please wait for staff to call your token.</p>}
             <p className="mt-3 text-sm text-muted-foreground">
               "People ahead" includes the patient currently being served and everyone who checked in before you. The wait is an estimate ({info.ahead} × 5 minutes).
             </p>

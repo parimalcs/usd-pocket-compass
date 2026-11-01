@@ -39,14 +39,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             {(["patient", "admin"] as const).map((r) => {
               const active = (r === "admin") === isAdmin;
               return (
-                <button
+                <Button variant="ghost"
                   key={r}
                   aria-pressed={active}
                   onClick={() => navigate({ to: r === "admin" ? "/admin" : "/" })}
                   className={cn("min-h-9 flex-1 rounded-md px-3 font-medium", active ? "bg-primary text-primary-foreground" : "text-secondary-foreground")}
                 >
                   {r === "admin" ? "Staff" : "Patient"}
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -99,7 +99,7 @@ const statusStyle: Record<Status, string> = {
   cancelled: "bg-destructive-soft text-destructive",
 };
 export function StatusBadge({ status, admin }: { status: Status; admin?: boolean }) {
-  const label = status === "serving" ? (admin ? "Serving" : "Your turn") : STATUS_LABEL[status];
+  const label = status === "serving" ? (admin ? "Serving" : "Your Turn") : STATUS_LABEL[status];
   return <span className={cn("inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold", statusStyle[status])}>{label}</span>;
 }
 

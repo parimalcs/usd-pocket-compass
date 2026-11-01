@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/queue")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Queue Tracking – QueueWise" },
       { name: "description", content: "Track your token, position and estimated waiting time." },
       { property: "og:title", content: "Queue Tracking – QueueWise" },
@@ -39,7 +41,7 @@ function QueuePage() {
   const d = doctorById(appt.doctorId);
   const info = queueInfo(s, appt);
   const stepIndex = { waiting: 0, serving: 1, completed: 2, cancelled: -1, booked: -1 }[appt.status];
-  const nearTurn = appt.status === "waiting" && info.ahead <= 1;
+  const nearTurn = appt.status === "waiting" && info.ahead <= 1 && !info.nextInLine;
 
   return (
     <>
@@ -47,8 +49,13 @@ function QueuePage() {
 
       {appt.status === "serving" && (
         <div role="status" className="mb-6 rounded-xl bg-primary p-6 text-primary-foreground">
-          <p className="text-sm font-bold uppercase tracking-widest">Your turn</p>
+          <p className="text-sm font-bold uppercase tracking-widest">Your Turn</p>
           <p className="mt-1 font-serif text-3xl font-semibold">Please proceed to {d.room}.</p>
+        </div>
+      )}
+      {info.nextInLine && (
+        <div role="status" className="mb-6 rounded-xl border border-primary bg-secondary p-4 font-medium text-primary">
+          You're next in line. Please wait for staff to call your token.
         </div>
       )}
       {nearTurn && (
@@ -74,7 +81,7 @@ function QueuePage() {
             <Stat label="Now serving" value={info.serving?.token ?? "—"} />
             <Stat label="People ahead" value={info.ahead} />
             <Stat label="Your position" value={`${info.position} of ${info.total}`} />
-            <Stat label="Estimated wait" value={appt.status === "serving" ? "Now" : `~${info.waitMinutes} min`} />
+            <Stat label="Estimated wait" value={appt.status === "serving" ? "Now" : info.nextInLine ? "Awaiting call" : `~${info.waitMinutes} min`} />
           </div>
         )}
 
