@@ -71,14 +71,14 @@ function seed(): State {
   others.slice(0, 4).forEach((name, i) =>
     appts.push({
       id: `A-${1001 + i}`, patientId: `P-${i}`, patientName: name, doctorId: "d1", date: t,
-      time: SLOTS[i], status: i === 0 ? "serving" : "waiting", token: `GM-${101 + i}`, checkedInAt: base + i * 60000,
+      time: SLOTS[i]!, status: i === 0 ? "serving" : "waiting", token: `GM-${101 + i}`, checkedInAt: base + i * 60000,
     }),
   );
   // Doctor d3 queue: 2 waiting
   others.slice(4).forEach((name, i) =>
     appts.push({
       id: `A-${1010 + i}`, patientId: `P-${10 + i}`, patientName: name, doctorId: "d3", date: t,
-      time: SLOTS[i], status: "waiting", token: `CA-${101 + i}`, checkedInAt: base + i * 60000,
+      time: SLOTS[i]!, status: "waiting", token: `CA-${101 + i}`, checkedInAt: base + i * 60000,
     }),
   );
   appts.push({ id: "A-1020", patientId: `P-20`, patientName: "Nikhil Joshi", doctorId: "d1", date: t, time: "09:00", status: "completed", token: "GM-100", checkedInAt: base - 60000 });

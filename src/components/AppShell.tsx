@@ -126,7 +126,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 function ConfirmDialogImpl({ label, title, description, onConfirm, className, confirmLabel }: {
-  label: string; title: string; description: string; onConfirm: () => void; className?: string; confirmLabel: string;
+  label: string; title: string; description: string; onConfirm: () => void; className?: string | undefined; confirmLabel: string;
 }) {
   return (
     <AlertDialog>
