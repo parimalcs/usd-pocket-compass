@@ -68,7 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="mx-auto w-full max-w-5xl min-w-0 flex-1 p-4 md:p-8">
         {children}
         <p className="mt-8 text-xs text-muted-foreground" aria-live="polite">
-          Last updated: {new Date(updatedAt).toLocaleTimeString()}
+          {updatedAt > 0 && <>Last updated: {new Date(updatedAt).toLocaleTimeString()}</>}
         </p>
       </main>
     </div>

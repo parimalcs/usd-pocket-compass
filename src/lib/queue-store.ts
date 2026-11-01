@@ -89,7 +89,7 @@ function seed(): State {
     { id: "A-2003", patientId: DEMO_PATIENT.id, patientName: DEMO_PATIENT.name, doctorId: "d5", date: dateKey(-10), time: "10:30", status: "completed", token: "OR-104" },
     { id: "A-2004", patientId: DEMO_PATIENT.id, patientName: DEMO_PATIENT.name, doctorId: "d3", date: dateKey(-4), time: "14:30", status: "cancelled" },
   );
-  return { appointments: appts, tokenCounters: { d1: 104, d2: 100, d3: 102, d4: 100, d5: 104 }, updatedAt: Date.now() };
+  return { appointments: appts, tokenCounters: { d1: 104, d2: 100, d3: 102, d4: 100, d5: 104 }, updatedAt: 0 };
 }
 
 const KEY = "queuewise-data-v1";

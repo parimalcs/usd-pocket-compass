@@ -46,7 +46,7 @@ function BookPage() {
 
   function next() {
     if (!canNext) {
-      setError(["Please select a department.", "Please select a doctor.", "Please select an available time slot.", "Please enter your name (at least 2 characters).", ""][step]);
+      setError((["Please select a department.", "Please select a doctor.", "Please select an available time slot.", "Please enter your name (at least 2 characters).", ""][step] ?? ""));
       return;
     }
     setError("");

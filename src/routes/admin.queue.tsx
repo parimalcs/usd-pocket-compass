@@ -20,7 +20,7 @@ export const Route = createFileRoute("/admin/queue")({
 
 function QueueManagement() {
   const s = useStore();
-  const [doctorId, setDoctorId] = useState(DOCTORS[0].id);
+  const [doctorId, setDoctorId] = useState(DOCTORS[0]!.id);
   const d = doctorById(doctorId);
   const q = doctorQueue(s, doctorId); // FIFO order
   const serving = q.find((a) => a.status === "serving");
