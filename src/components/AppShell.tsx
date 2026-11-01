@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { hydrateStore, useStore, type Status, STATUS_LABEL } from "@/lib/queue-store";
 import { cn } from "@/lib/utils";
 
@@ -23,8 +23,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   const nav = isAdmin ? adminNav : patientNav;
   const { updatedAt } = useStore();
 
+  // Saved data lives in the browser, so page content renders after loading it.
+  const [ready, setReady] = useState(hydrated);
   useEffect(() => {
     if (!hydrated) { hydrated = true; hydrateStore(); }
+    setReady(true);
   }, []);
 
   return (
@@ -66,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </p>
       </aside>
       <main className="mx-auto w-full max-w-5xl min-w-0 flex-1 p-4 md:p-8">
-        {children}
+        {ready ? children : <p className="text-muted-foreground">Loading…</p>}
         <p className="mt-8 text-xs text-muted-foreground" aria-live="polite">
           {updatedAt > 0 && <>Last updated: {new Date(updatedAt).toLocaleTimeString()}</>}
         </p>
