@@ -1,0 +1,4 @@
+- [ ] Refine shared queue status and doctor-specific actions.
+- [ ] Validate booking selections and coherent appointment dates.
+- [ ] Preserve styling and improve keyboard/selection accessibility.
+- [ ] Verify booking, check-in, staff calls, completion and cancellation.
