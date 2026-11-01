@@ -31,6 +31,7 @@ function AppointmentsPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("upcoming");
   const current = TABS.find((t) => t.key === tab) ?? TABS[0];
+  if (!current) return null;
   const list = s.appointments
     .filter((a) => a.patientId === DEMO_PATIENT.id && current.match(a))
     .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
