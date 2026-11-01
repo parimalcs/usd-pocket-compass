@@ -93,7 +93,8 @@ function seed(): State {
 }
 
 const KEY = "queuewise-data-v1";
-let state: State = seed();
+const serverState: State = seed();
+let state: State = serverState;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
@@ -119,7 +120,7 @@ export function useStore() {
   return useSyncExternalStore(
     (l) => { listeners.add(l); return () => listeners.delete(l); },
     () => state,
-    () => state,
+    () => serverState, // used during SSR + hydration so markup matches
   );
 }
 
