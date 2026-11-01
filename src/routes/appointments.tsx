@@ -3,12 +3,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Card, ConfirmButton, PageHeader, StatusBadge } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { cancel, checkIn, DEMO_PATIENT, doctorById, formatDate, today, useStore, type Appointment } from "@/lib/queue-store";
+import { cancel, checkIn, DEMO_PATIENT, doctorById, formatDate, isUpcoming, today, useStore, type Appointment } from "@/lib/queue-store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/appointments")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "My Appointments – QueueWise" },
       { name: "description", content: "View, check in or cancel your appointments." },
       { property: "og:title", content: "My Appointments – QueueWise" },
@@ -19,7 +21,7 @@ export const Route = createFileRoute("/appointments")({
 });
 
 const TABS = [
-  { key: "upcoming", label: "Upcoming", match: (a: Appointment) => ["booked", "waiting", "serving"].includes(a.status) },
+  { key: "upcoming", label: "Upcoming", match: (a: Appointment) => isUpcoming(a) },
   { key: "completed", label: "Completed", match: (a: Appointment) => a.status === "completed" },
   { key: "cancelled", label: "Cancelled", match: (a: Appointment) => a.status === "cancelled" },
 ];
@@ -28,7 +30,7 @@ function AppointmentsPage() {
   const s = useStore();
   const navigate = useNavigate();
   const [tab, setTab] = useState("upcoming");
-  const current = TABS.find((t) => t.key === tab)!;
+  const current = TABS.find((t) => t.key === tab) ?? TABS[0];
   const list = s.appointments
     .filter((a) => a.patientId === DEMO_PATIENT.id && current.match(a))
     .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
@@ -38,10 +40,10 @@ function AppointmentsPage() {
       <PageHeader title="My appointments" subtitle="Check-in opens on the day of your appointment. Checking in gives you a queue token." />
       <div role="tablist" aria-label="Appointment categories" className="mb-4 flex gap-1 rounded-lg border border-border bg-card p-1">
         {TABS.map((t) => (
-          <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)}
+          <Button variant="ghost" key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)}
             className={cn("min-h-10 flex-1 rounded-md px-3 text-sm font-medium", tab === t.key ? "bg-primary text-primary-foreground" : "text-muted-foreground")}>
             {t.label}
-          </button>
+          </Button>
         ))}
       </div>
 

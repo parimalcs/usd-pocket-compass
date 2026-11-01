@@ -7,6 +7,8 @@ import { DOCTORS, doctorQueue, resetDemo, today, useStore } from "@/lib/queue-st
 export const Route = createFileRoute("/admin/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Staff Dashboard – QueueWise" },
       { name: "description", content: "Today's appointments and live queue overview for hospital staff." },
       { property: "og:title", content: "Staff Dashboard – QueueWise" },

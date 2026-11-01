@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Card, PageHeader, StatusBadge } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import {
-  bookAppointment, dateKey, DEMO_PATIENT, DEPARTMENTS, DOCTORS, doctorById, formatDate, isSlotTaken, SLOTS, useStore,
+  bookingError, bookAppointment, dateKey, DEMO_PATIENT, DEPARTMENTS, DOCTORS, doctorById, formatDate, isSlotTaken, SLOTS, useStore,
   type Appointment,
 } from "@/lib/queue-store";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/book")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Book Appointment – QueueWise" },
       { name: "description", content: "Book a hospital appointment in five simple steps." },
       { property: "og:title", content: "Book Appointment – QueueWise" },
@@ -25,8 +27,8 @@ const STEPS = ["Department", "Doctor", "Date & time", "Your details", "Confirm"]
 
 function choice(selected: boolean) {
   return cn(
-    "min-h-11 rounded-lg border-2 px-4 py-3 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:line-through",
-    selected ? "border-primary bg-secondary font-semibold text-primary" : "border-border bg-card hover:border-sage",
+    "h-auto min-h-11 justify-start whitespace-normal rounded-lg border-2 px-4 py-3 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:line-through",
+    selected ? "border-primary bg-secondary font-semibold text-primary after:ml-auto after:pl-2 after:content-['✓']" : "border-border bg-card hover:border-sage",
   );
 }
 
@@ -42,11 +44,12 @@ function BookPage() {
   const [done, setDone] = useState<Appointment | null>(null);
   const dates = Array.from({ length: 7 }, (_, i) => dateKey(i));
 
-  const canNext = [!!dept, !!doctorId, !!time && !isSlotTaken(s, doctorId, date, time), name.trim().length >= 2, true][step];
+  const validation = bookingError(s, { department: dept, doctorId, date, time, patientName: name }, step);
+  const canNext = !validation;
 
   function next() {
     if (!canNext) {
-      setError(["Please select a department.", "Please select a doctor.", "Please select an available time slot.", "Please enter your name (at least 2 characters).", ""][step] ?? "");
+      setError(validation);
       return;
     }
     setError("");
@@ -97,7 +100,7 @@ function BookPage() {
           <fieldset><legend className="mb-3 font-serif text-xl font-semibold">Select a department</legend>
             <div className="grid gap-3 sm:grid-cols-2">
               {DEPARTMENTS.map((d) => (
-                <button key={d} aria-pressed={dept === d} className={choice(dept === d)} onClick={() => { setDept(d); setDoctorId(""); setTime(""); }}>{d}</button>
+                <Button variant="outline" key={d} aria-pressed={dept === d} className={choice(dept === d)} onClick={() => { setDept(d); setDoctorId(""); setTime(""); }}>{d}</Button>
               ))}
             </div>
           </fieldset>
@@ -108,11 +111,11 @@ function BookPage() {
               {DOCTORS.filter((d) => d.department === dept).map((d) => {
                 const free = SLOTS.filter((t) => !isSlotTaken(s, d.id, date, t)).length;
                 return (
-                  <button key={d.id} aria-pressed={doctorId === d.id} className={choice(doctorId === d.id)} onClick={() => { setDoctorId(d.id); setTime(""); }}>
+                  <Button variant="outline" key={d.id} aria-pressed={doctorId === d.id} className={choice(doctorId === d.id)} onClick={() => { setDoctorId(d.id); setTime(""); }}>
                     <span className="block text-base">{d.name}</span>
                     <span className="block text-muted-foreground">{d.department} · {d.room}</span>
                     <span className="block text-muted-foreground">{free} slots free on {formatDate(date)}</span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -123,7 +126,7 @@ function BookPage() {
             <fieldset><legend className="mb-3 font-serif text-xl font-semibold">Select a date</legend>
               <div className="flex flex-wrap gap-2">
                 {dates.map((d) => (
-                  <button key={d} aria-pressed={date === d} className={choice(date === d)} onClick={() => { setDate(d); setTime(""); }}>{formatDate(d)}</button>
+                  <Button variant="outline" key={d} aria-pressed={date === d} className={choice(date === d)} onClick={() => { setDate(d); setTime(""); }}>{formatDate(d)}</Button>
                 ))}
               </div>
             </fieldset>
@@ -131,9 +134,9 @@ function BookPage() {
               <p className="mb-3 text-sm text-muted-foreground">Crossed-out slots are already booked or unavailable.</p>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                 {SLOTS.map((t) => {
-                  const taken = isSlotTaken(s, doctorId, date, t);
+                  const taken = isSlotTaken(s, doctorId, date, t) || new Date(`${date}T${t}:00`).getTime() < Date.now();
                   return (
-                    <button key={t} disabled={taken} aria-pressed={time === t} aria-label={`${t}${taken ? " (unavailable)" : ""}`} className={choice(time === t)} onClick={() => setTime(t)}>{t}</button>
+                    <Button variant="outline" key={t} disabled={taken} aria-pressed={time === t} aria-label={`${t}${taken ? " (unavailable)" : ""}`} className={choice(time === t)} onClick={() => setTime(t)}>{t}</Button>
                   );
                 })}
               </div>
@@ -144,7 +147,7 @@ function BookPage() {
           <div className="max-w-sm">
             <label htmlFor="pname" className="mb-1 block font-serif text-xl font-semibold">Patient name</label>
             <p className="mb-2 text-sm text-muted-foreground">Enter the name of the person attending.</p>
-            <input id="pname" value={name} onChange={(e) => setName(e.target.value)} aria-invalid={!!error}
+            <input id="pname" value={name} onChange={(e) => setName(e.target.value)} aria-invalid={name.trim().length < 2} aria-describedby="booking-validation"
               className="min-h-11 w-full rounded-lg border border-input bg-card px-3" />
           </div>
         )}
@@ -160,10 +163,10 @@ function BookPage() {
           </div>
         )}
 
-        {error && <p role="alert" className="mt-4 text-sm font-medium text-destructive">{error}</p>}
+        {(error || validation) && <p id="booking-validation" role="status" aria-live="polite" className="mt-4 text-sm font-medium text-destructive">{error || validation}</p>}
         <div className="mt-6 flex justify-between gap-2">
           <Button variant="outline" disabled={step === 0} onClick={() => { setError(""); setStep(step - 1); }}>Back</Button>
-          <Button onClick={next}>{step === 4 ? "Confirm appointment" : "Continue"}</Button>
+          <Button disabled={!canNext} aria-describedby={validation ? "booking-validation" : undefined} onClick={next}>{step === 4 ? "Confirm appointment" : "Continue"}</Button>
         </div>
       </Card>
     </>

@@ -45,7 +45,11 @@ export const BLOCKED: Record<string, string[]> = { d1: ["11:30"], d2: ["09:00"],
 export const AVG_MINUTES = 5;
 export const DEMO_PATIENT = { id: "P-DEMO", name: "Aarav Sharma" };
 
-export const doctorById = (id: string) => DOCTORS.find((d) => d.id === id) ?? DOCTORS[0] as Doctor;
+export function doctorById(id: string): Doctor {
+  const doctor = DOCTORS.find((d) => d.id === id);
+  if (!doctor) throw new Error("Unknown doctor");
+  return doctor;
+}
 
 export function dateKey(offsetDays = 0) {
   const d = new Date();

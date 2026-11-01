@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/admin/queue")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: "Queue Management – QueueWise" },
       { name: "description", content: "Call, complete and cancel patient tokens in FIFO order." },
       { property: "og:title", content: "Queue Management – QueueWise" },
@@ -20,7 +22,7 @@ export const Route = createFileRoute("/admin/queue")({
 
 function QueueManagement() {
   const s = useStore();
-  const [doctorId, setDoctorId] = useState(DOCTORS[0]!.id);
+  const [doctorId, setDoctorId] = useState(DOCTORS[0]?.id ?? "d1");
   const d = doctorById(doctorId);
   const q = doctorQueue(s, doctorId); // FIFO order
   const serving = q.find((a) => a.status === "serving");
